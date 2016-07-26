@@ -7,13 +7,14 @@ from semantic.dates import DateService
 WORDS = ["TIME"]
 
 
-def handle(text, mic, profile):
+def handle(text, speaker, mic, profile):
     """
         Reports the current time based on the user's timezone.
 
         Arguments:
         text -- user-input, typically transcribed speech
-        mic -- used to interact with the user (for both input and output)
+        speaker -- used to interact with the user (output)
+        mic -- used to interact with the user (input)
         profile -- contains information related to the user (e.g., phone
                    number)
     """
@@ -22,7 +23,7 @@ def handle(text, mic, profile):
     now = datetime.datetime.now(tz=tz)
     service = DateService()
     response = service.convertTime(now)
-    mic.say("It is %s right now." % response)
+    speaker.clean_and_say("It is %s right now." % response)
 
 
 def isValid(text):

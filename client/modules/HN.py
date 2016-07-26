@@ -42,7 +42,7 @@ def getTopStories(maxResults=None):
     return matches
 
 
-def handle(text, mic, profile):
+def handle(text, speaker, mic, profile):
     """
         Responds to user-input, typically speech text, with a sample of
         Hacker News's top headlines, sending them to the user over email
@@ -50,11 +50,12 @@ def handle(text, mic, profile):
 
         Arguments:
         text -- user-input, typically transcribed speech
-        mic -- used to interact with the user (for both input and output)
+        speaker -- used to interact with the user (output)
+        mic -- used to interact with the user (input)
         profile -- contains information related to the user (e.g., phone
                    number)
     """
-    mic.say("Pulling up some stories.")
+    speaker.clean_and_say("Pulling up some stories.")
     stories = getTopStories(maxResults=3)
     all_titles = '... '.join(str(idx + 1) + ") " +
                              story.title for idx, story in enumerate(stories))
@@ -73,7 +74,7 @@ def handle(text, mic, profile):
         send_all = not chosen_articles and app_utils.isPositive(text)
 
         if send_all or chosen_articles:
-            mic.say("Sure, just give me a moment")
+            speaker.clean_and_say("Sure, just give me a moment")
 
             if profile['prefers_email']:
                 body = "<ul>"
@@ -96,7 +97,7 @@ def handle(text, mic, profile):
                     else:
                         if not app_utils.emailUser(profile, SUBJECT="",
                                                    BODY=article_link):
-                            mic.say("I'm having trouble sending you these " +
+                            speaker.clean_and_say("I'm having trouble sending you these " +
                                     "articles. Please make sure that your " +
                                     "phone number and carrier are correct " +
                                     "on the dashboard.")
@@ -109,24 +110,24 @@ def handle(text, mic, profile):
                                            SUBJECT="From the Front Page of " +
                                                    "Hacker News",
                                            BODY=body):
-                    mic.say("I'm having trouble sending you these articles. " +
+                    speaker.clean_and_say("I'm having trouble sending you these articles. " +
                             "Please make sure that your phone number and " +
                             "carrier are correct on the dashboard.")
                     return
 
-            mic.say("All done.")
+            speaker.clean_and_say("All done.")
 
         else:
-            mic.say("OK I will not send any articles")
+            speaker.clean_and_say("OK I will not send any articles")
 
     if not profile['prefers_email'] and profile['phone_number']:
-        mic.say("Here are some front-page articles. " +
+        speaker.clean_and_say("Here are some front-page articles. " +
                 all_titles + ". Would you like me to send you these? " +
                 "If so, which?")
         handleResponse(mic.activeListen())
 
     else:
-        mic.say("Here are some front-page articles. " + all_titles)
+        speaker.clean_and_say("Here are some front-page articles. " + all_titles)
 
 
 def isValid(text):

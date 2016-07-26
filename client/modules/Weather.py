@@ -91,7 +91,7 @@ def get_forecast_by_wmo_id(wmo_id):
                             % wmo_id)['entries']
 
 
-def handle(text, mic, profile):
+def handle(text, speaker, mic, profile):
     """
     Responds to user-input, typically speech text, with a summary of
     the relevant weather for the requested date (typically, weather
@@ -99,7 +99,8 @@ def handle(text, mic, profile):
 
     Arguments:
         text -- user-input, typically transcribed speech
-        mic -- used to interact with the user (for both input and output)
+		speaker -- used to interact with the user (output)
+        mic -- used to interact with the user (input)
         profile -- contains information related to the user (e.g., phone
                    number)
     """
@@ -110,7 +111,7 @@ def handle(text, mic, profile):
         forecast = get_forecast_by_name(str(profile['location']))
 
     if not forecast:
-        mic.say("I'm sorry, I can't seem to access that information. Please " +
+        speaker.clean_and_say("I'm sorry, I can't seem to access that information. Please " +
                 "make sure that you've set your location on the dashboard.")
         return
 
@@ -155,9 +156,9 @@ def handle(text, mic, profile):
 
     if output:
         output = replaceAcronyms(output)
-        mic.say(output)
+        speaker.clean_and_say(output)
     else:
-        mic.say(
+        speaker.clean_and_say(
             "I'm sorry. I can't see that far ahead.")
 
 

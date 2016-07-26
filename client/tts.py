@@ -72,6 +72,12 @@ class AbstractTTSEngine(object):
     def say(self, phrase, *args):
         pass
 
+    def clean_and_say(self, phrase,
+            OPTIONS=" -vdefault+m3 -p 40 -s 160 --stdout > say.wav"):
+        # alter phrase before speaking
+        phrase = alteration.clean(phrase)
+        self.say(phrase)
+
     def play_wav_file(fname):
         """Simple callback function to play a wave file.
         :param str fname: wave file name

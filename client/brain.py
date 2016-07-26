@@ -6,7 +6,7 @@ import jasperpath
 
 class Brain(object):
 
-    def __init__(self, mic, profile):
+    def __init__(self, speaker, mic, profile):
         """
         Instantiates a new Brain object, which cross-references user
         input with a list of modules. Note that the order of brain.modules
@@ -14,12 +14,14 @@ class Brain(object):
         that accepts a given input.
 
         Arguments:
-        mic -- used to interact with the user (for both input and output)
+        mic -- used to interact with the user (input)
+        speaker -- used to interact with the user (output)
         profile -- contains information related to the user (e.g., phone
                    number)
         """
 
         self.mic = mic
+        self.speaker = speaker
         self.profile = profile
         self.modules = self.get_modules()
         self._logger = logging.getLogger(__name__)
@@ -74,7 +76,7 @@ class Brain(object):
                     except Exception:
                         self._logger.error('Failed to execute module',
                                            exc_info=True)
-                        self.mic.say("I'm sorry. I had some trouble with " +
+                        self.speaker.clean_and_say("I'm sorry. I had some trouble with " +
                                      "that operation. Please try again later.")
                     else:
                         self._logger.debug("Handling of phrase '%s' by " +

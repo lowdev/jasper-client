@@ -95,9 +95,10 @@ class Jasper(object):
                            "to '%s'", tts_engine_slug)
         tts_engine_class = tts.get_engine_by_slug(tts_engine_slug)
 
+        self.speaker = tts_engine_class.get_instance()
+
         # Initialize Mic
-        self.mic = Mic(tts_engine_class.get_instance(),
-                       stt_engine_class.get_active_instance())
+        self.mic = Mic(stt_engine_class.get_active_instance())
 
     def run(self):
         if 'first_name' in self.config:
@@ -105,9 +106,9 @@ class Jasper(object):
                           % self.config["first_name"])
         else:
             salutation = "How can I be of service?"
-        self.mic.say(salutation)
+        self.speaker.clean_and_say(salutation)
 
-        conversation = Conversation(self.mic, self.config)
+        conversation = Conversation(self.speaker, self.mic, self.config)
         conversation.handleForever()
 
 if __name__ == "__main__":

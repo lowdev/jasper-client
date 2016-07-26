@@ -1,6 +1,6 @@
 # -*- coding: utf-8-*-
 """
-    The Mic class handles all interactions with the microphone and speaker.
+    The Mic class handles all interactions with the microphone.
 """
 import logging
 import tempfile
@@ -18,16 +18,14 @@ class Mic:
     RATE = 16000
     CHUNK = 1024
 
-    def __init__(self, speaker, active_stt_engine):
+    def __init__(self, active_stt_engine):
         """
         Initiates the pocketsphinx instance.
 
         Arguments:
-        speaker -- handles platform-independent audio output
         acive_stt_engine -- performs STT while Jasper is in active listen mode
         """
         self._logger = logging.getLogger(__name__)
-        self.speaker = speaker
         self.active_stt_engine = active_stt_engine
         self._logger.info("Initializing PyAudio. ALSA/Jack error messages " +
                           "that pop up during this process are normal and " +
@@ -105,8 +103,6 @@ class Mic:
         LISTEN_TIME = 12
         THRESHOLD = self.energy_threshold
 
-        self.speaker.play_wav_file(jasperpath.data('audio', 'beep_hi.wav'))
-
         # prepare recording stream
         stream = self._audio.open(format=pyaudio.paInt16,
                                   channels=1,
@@ -134,8 +130,6 @@ class Mic:
             if average < THRESHOLD * 0.8:
                 break
 
-        self.speaker.play_wav_file(jasperpath.data('audio', 'beep_lo.wav'))
-
         # save the audio data
         stream.stop_stream()
         stream.close()
@@ -149,9 +143,3 @@ class Mic:
             wav_fp.close()
             f.seek(0)
             return self.active_stt_engine.transcribe(f)
-
-    def say(self, phrase,
-            OPTIONS=" -vdefault+m3 -p 40 -s 160 --stdout > say.wav"):
-        # alter phrase before speaking
-        phrase = alteration.clean(phrase)
-        self.speaker.say(phrase)

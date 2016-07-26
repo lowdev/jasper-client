@@ -6,7 +6,7 @@ import facebook
 WORDS = ["FACEBOOK", "NOTIFICATION"]
 
 
-def handle(text, mic, profile):
+def handle(text, speaker, mic, profile):
     """
         Responds to user-input, typically speech text, with a summary of
         the user's Facebook notifications, including a count and details
@@ -14,7 +14,8 @@ def handle(text, mic, profile):
 
         Arguments:
         text -- user-input, typically transcribed speech
-        mic -- used to interact with the user (for both input and output)
+        speaker -- used to interact with the user (output)
+        mic -- used to interact with the user (input)
         profile -- contains information related to the user (e.g., phone
                    number)
     """
@@ -25,16 +26,16 @@ def handle(text, mic, profile):
     try:
         results = graph.request("me/notifications")
     except facebook.GraphAPIError:
-        mic.say("I have not been authorized to query your Facebook. If you " +
+        speaker.clean_and_say("I have not been authorized to query your Facebook. If you " +
                 "would like to check your notifications in the future, " +
                 "please visit the Jasper dashboard.")
         return
     except:
-        mic.say(
+        speaker.clean_and_say(
             "I apologize, there's a problem with that service at the moment.")
 
     if not len(results['data']):
-        mic.say("You have no Facebook notifications. ")
+        speaker.clean_and_say("You have no Facebook notifications. ")
         return
 
     updates = []
@@ -42,7 +43,7 @@ def handle(text, mic, profile):
         updates.append(notification['title'])
 
     count = len(results['data'])
-    mic.say("You have " + str(count) +
+    speaker.clean_and_say("You have " + str(count) +
             " Facebook notifications. " + " ".join(updates) + ". ")
 
     return
