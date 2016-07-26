@@ -29,7 +29,7 @@ class Conversation(object):
         input = self.mic.activeListenToAllOptions(threshold)
         self._logger.debug("Stopped to listen actively with threshold: %r",
                                threshold)
-        print("i'm here now")
+
         if input:
             self.brain.query(input)
         else:
@@ -45,6 +45,10 @@ class Conversation(object):
         MODEL_FILE = os.path.join(TOP_DIR, "snowboy/model.pmdl")
 
         signal.signal(signal.SIGINT, self.signal_handler)
+
+        print("A moment of silence, please...")
+        self.mic.adjust_for_ambient_noise()
+
         detector = snowboydecoder.HotwordDetector(MODEL_FILE, sensitivity=0.5)
         print('Listening... Press Ctrl+C to exit')
 

@@ -15,6 +15,8 @@ class Mic:
 
     speechRec = None
     speechRec_persona = None
+    RATE = 16000
+    CHUNK = 1024
 
     def __init__(self, speaker, active_stt_engine):
         """
@@ -33,6 +35,46 @@ class Mic:
         self._audio = pyaudio.PyAudio()
         self._logger.info("Initialization of PyAudio completed.")
 
+        self.format = pyaudio.paInt16
+        self.SAMPLE_WIDTH = pyaudio.get_sample_size(self.format)
+
+        self.energy_threshold = 300 # minimum audio energy to consider for recording
+        self.dynamic_energy_threshold = True
+        self.dynamic_energy_adjustment_damping = 0.15
+        self.dynamic_energy_ratio = 1.5
+        self.pause_threshold = 0.8 # seconds of non-speaking audio before a phrase is considered complete
+        self.phrase_threshold = 0.3 # minimum seconds of speaking audio before we consider the speaking audio a phrase - values below this are ignored (for filtering out clicks and pops)
+        self.non_speaking_duration = 0.5 # seconds of non-speaking audio to keep on both sides of the recording
+
+    def adjust_for_ambient_noise(self, duration = 1):
+        """
+        Adjusts the energy threshold dynamically using audio from ``source`` (an ``AudioSource`` instance) to account for ambient noise.
+        Intended to calibrate the energy threshold with the ambient energy level. Should be used on periods of audio without speech - will stop early if any speech is detected.
+        The ``duration`` parameter is the maximum number of seconds that it will dynamically adjust the threshold for before returning. This value should be at least 0.5 in order to get a representative sample of the ambient noise.
+        """
+        stream = self._audio.open(format=pyaudio.paInt16,
+                                  channels=1,
+                                  rate=self.RATE,
+                                  input=True,
+                                  frames_per_buffer=self.CHUNK)
+
+        assert self.pause_threshold >= self.non_speaking_duration >= 0
+
+        seconds_per_buffer = (self.CHUNK + 0.0) / self.RATE
+        elapsed_time = 0
+
+        # adjust energy threshold until a phrase starts
+        while True:
+            elapsed_time += seconds_per_buffer
+            if elapsed_time > duration: break
+            buffer = stream.read(self.CHUNK)
+            energy = audioop.rms(buffer, self.SAMPLE_WIDTH) # energy of the audio signal
+
+            # dynamically adjust the energy threshold using assymmetric weighted average
+            damping = self.dynamic_energy_adjustment_damping ** seconds_per_buffer # account for different chunk sizes and rates
+            target_energy = energy * self.dynamic_energy_ratio
+            self.energy_threshold = self.energy_threshold * damping + target_energy * (1 - damping)
+
     def __del__(self):
         self._audio.terminate()
 
@@ -40,48 +82,6 @@ class Mic:
         rms = audioop.rms(data, 2)
         score = rms / 3
         return score
-
-    def fetchThreshold(self):
-
-        # TODO: Consolidate variables from the next three functions
-        THRESHOLD_MULTIPLIER = 1.8
-        RATE = 16000
-        CHUNK = 1024
-
-        # number of seconds to allow to establish threshold
-        THRESHOLD_TIME = 1
-
-        # prepare recording stream
-        stream = self._audio.open(format=pyaudio.paInt16,
-                                  channels=1,
-                                  rate=RATE,
-                                  input=True,
-                                  frames_per_buffer=CHUNK)
-
-        # stores the audio data
-        frames = []
-
-        # stores the lastN score values
-        lastN = [i for i in range(20)]
-
-        # calculate the long run average, and thereby the proper threshold
-        for i in range(0, RATE / CHUNK * THRESHOLD_TIME):
-
-            data = stream.read(CHUNK)
-            frames.append(data)
-
-            # save this data point as a score
-            lastN.pop(0)
-            lastN.append(self.getScore(data))
-            average = sum(lastN) / len(lastN)
-
-        stream.stop_stream()
-        stream.close()
-
-        # this will be the benchmark to cause a disturbance over!
-        THRESHOLD = average * THRESHOLD_MULTIPLIER
-
-        return THRESHOLD
 
     def activeListen(self, THRESHOLD=None, LISTEN=True, MUSIC=False):
         """
@@ -102,31 +102,26 @@ class Mic:
             Returns a list of the matching options or None
         """
 
-        RATE = 16000
-        CHUNK = 1024
         LISTEN_TIME = 12
-
-        # check if no threshold provided
-        if THRESHOLD is None:
-            THRESHOLD = self.fetchThreshold()
+        THRESHOLD = self.energy_threshold
 
         self.speaker.play(jasperpath.data('audio', 'beep_hi.wav'))
 
         # prepare recording stream
         stream = self._audio.open(format=pyaudio.paInt16,
                                   channels=1,
-                                  rate=RATE,
+                                  rate=self.RATE,
                                   input=True,
-                                  frames_per_buffer=CHUNK)
+                                  frames_per_buffer=self.CHUNK)
 
         frames = []
         # increasing the range # results in longer pause after command
         # generation
         lastN = [THRESHOLD * 1.2 for i in range(30)]
 
-        for i in range(0, RATE / CHUNK * LISTEN_TIME):
+        for i in range(0, self.RATE / self.CHUNK * LISTEN_TIME):
 
-            data = stream.read(CHUNK)
+            data = stream.read(self.CHUNK)
             frames.append(data)
             score = self.getScore(data)
 
@@ -149,7 +144,7 @@ class Mic:
             wav_fp = wave.open(f, 'wb')
             wav_fp.setnchannels(1)
             wav_fp.setsampwidth(pyaudio.get_sample_size(pyaudio.paInt16))
-            wav_fp.setframerate(RATE)
+            wav_fp.setframerate(self.RATE)
             wav_fp.writeframes(''.join(frames))
             wav_fp.close()
             f.seek(0)
