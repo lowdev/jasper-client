@@ -42,7 +42,7 @@ except ImportError:
 
 import diagnose
 import jasperpath
-
+import alteration
 
 class AbstractTTSEngine(object):
     """
