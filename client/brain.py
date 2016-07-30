@@ -72,7 +72,7 @@ class Brain(object):
                     self._logger.debug("'%s' is a valid phrase for module " +
                                        "'%s'", text, module.__name__)
                     try:
-                        module.handle(text, self.mic, self.profile)
+                        module.handle(text, self.speaker, self.mic, self.profile)
                     except Exception:
                         self._logger.error('Failed to execute module',
                                            exc_info=True)

@@ -115,7 +115,7 @@ def handle(text, speaker, mic, profile):
         speaker.clean_and_say("Here are the current top headlines. " + all_titles +
                 ". Would you like me to send you these articles? " +
                 "If so, which?")
-        handleResponse(mic.activeListen())
+        handleResponse(mic.listen())
 
     else:
         speaker.clean_and_say(

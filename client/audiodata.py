@@ -1,3 +1,6 @@
+import io
+import wave
+
 class AudioData(object):
     def __init__(self, frame_data, sample_rate, sample_width):
         assert sample_rate > 0, "Sample rate must be a positive integer"

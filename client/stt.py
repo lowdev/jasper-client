@@ -153,17 +153,12 @@ class PocketSphinxSTT(AbstractSTTEngine):
         return config
 
     def transcribe(self, audio_data):
-        fp = audio_data.get_wav_data(
+        raw_data = audio_data.get_wav_data(
             convert_rate = 16000, # audio samples must be 8kHz or 16 kHz
             convert_width = 2 # audio samples should be 16-bit
         )
-        fp.seek(44)
-
-        # FIXME: Can't use the Decoder.decode_raw() here, because
-        # pocketsphinx segfaults with tempfile.SpooledTemporaryFile()
-        data = fp.read()
         self._decoder.start_utt()
-        self._decoder.process_raw(data, False, True)
+        self._decoder.process_raw(raw_data, False, True)
         self._decoder.end_utt()
 
         result = self._decoder.get_hyp()

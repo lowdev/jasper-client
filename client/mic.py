@@ -145,7 +145,7 @@ class Mic:
         for i in range(pause_count - non_speaking_buffer_count): frames.pop() # remove extra non-speaking frames at the end
         frame_data = b"".join(list(frames))
 
-        return AudioData(frame_data, source.RATE, source.SAMPLE_WIDTH)
+        return AudioData(frame_data, self.RATE, self.SAMPLE_WIDTH)
 
     def __del__(self):
         self._audio.terminate()
