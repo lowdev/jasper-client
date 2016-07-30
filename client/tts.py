@@ -78,7 +78,7 @@ class AbstractTTSEngine(object):
         phrase = alteration.clean(phrase)
         self.say(phrase)
 
-    def play_wav_file(fname):
+    def play_wav_file(self, fname):
         """Simple callback function to play a wave file.
         :param str fname: wave file name
         :return: None

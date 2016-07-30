@@ -9,7 +9,7 @@ import audioop
 import pyaudio
 import math
 import collections
-from audiodata from AudioData
+from audiodata import AudioData
 
 class Mic:
 

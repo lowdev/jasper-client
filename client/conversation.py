@@ -31,7 +31,7 @@ class Conversation(object):
                                threshold)
         self.speaker.play_wav_file(jasperpath.data('audio', 'beep_hi.wav'))
         audio_data = self.mic.listen()
-		text = self.speech_recognizer.transcribe(audio_data)
+        text = self.speech_recognizer.transcribe(audio_data)
         self.speaker.play_wav_file(jasperpath.data('audio', 'beep_lo.wav'))
         self._logger.debug("Stopped to listen actively with threshold: %r",
                                threshold)

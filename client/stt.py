@@ -59,7 +59,7 @@ class AbstractSTTEngine(object):
 
     @abstractmethod
     def transcribe(self, audio_data):
-	    """
+        """
         Performs STT, transcribing an audio file and returning the result.
 
         Arguments:
@@ -153,7 +153,7 @@ class PocketSphinxSTT(AbstractSTTEngine):
         return config
 
     def transcribe(self, audio_data):
-		fp = audio_data.get_wav_data(
+        fp = audio_data.get_wav_data(
             convert_rate = 16000, # audio samples must be 8kHz or 16 kHz
             convert_width = 2 # audio samples should be 16-bit
         )
@@ -242,7 +242,7 @@ class JuliusSTT(AbstractSTTEngine):
         return config
 
     def transcribe(self, audio_data):
-	    fp = audio_data.get_wav_data(
+        fp = audio_data.get_wav_data(
             convert_rate = 16000, # audio samples must be 8kHz or 16 kHz
             convert_width = 2 # audio samples should be 16-bit
         )
@@ -487,7 +487,7 @@ class AttSTT(AbstractSTTEngine):
         return self._token
 
     def transcribe(self, audio_data):
-	    fp = audio_data.get_wav_data(
+        fp = audio_data.get_wav_data(
             convert_rate = 16000, # audio samples must be 8kHz or 16 kHz
             convert_width = 2 # audio samples should be 16-bit
         )
