@@ -10,8 +10,9 @@ class Requester(object):
 
     def make_a_request(self):
         self.speaker.play_wav_file(jasperpath.data('audio', 'beep_hi.wav'))
-        audio_data = self.mic.listen()
+        audio_data = self.mic.listen(4)
         text = self.speech_recognizer.transcribe(audio_data)
+        print("text : " + text)
         self.speaker.play_wav_file(jasperpath.data('audio', 'beep_lo.wav'))
 	
         return text

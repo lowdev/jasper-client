@@ -15,7 +15,20 @@ import yaml
 import jasperpath
 import diagnose
 import vocabcompiler
+import uuid
 
+try: # attempt to use the Python 2 modules
+    from urllib import urlencode
+    from urllib2 import Request, urlopen, URLError, HTTPError
+except ImportError: # use the Python 3 modules
+    from urllib.parse import urlencode
+    from urllib.request import Request, urlopen
+    from urllib.error import URLError, HTTPError
+
+# define exceptions
+class WaitTimeoutError(Exception): pass
+class RequestError(Exception): pass
+class UnknownValueError(Exception): pass
 
 class AbstractSTTEngine(object):
     """
@@ -629,6 +642,114 @@ class WitAiSTT(AbstractSTTEngine):
     def is_available(cls):
         return diagnose.check_network_connection()
 
+class BingSTT(AbstractSTTEngine):
+    """
+    Performs speech recognition on wav file, using the Microsoft Bing Voice Recognition API.
+    The Microsoft Bing Voice Recognition API key is specified by ``key``. Unfortunately, these are not avail$
+    To get the API key, go to the `Microsoft Cognitive Services subscriptions overview <https://www.microsof$
+    The recognition language is determined by ``language``, an RFC5646 language tag like ``"en-US"`` (US Eng$
+    Returns the most likely transcription. Otherwise, returns the `raw API response <https://www.microsoft.c$
+    """
+
+    SLUG = "bing"
+
+    def __init__(self, key, language = "en-US", show_all = False):
+        self._logger = logging.getLogger(__name__)
+        self.key = key
+        self.language = language
+        self.show_all = show_all
+
+    @classmethod
+    def get_config(cls):
+        # FIXME: Replace this as soon as we have a config module
+        config = {}
+        # HMM dir
+		# Try to get hmm_dir from config
+        profile_path = jasperpath.config('profile.yml')
+
+        if os.path.exists(profile_path):
+            with open(profile_path, 'r') as f:
+                profile = yaml.safe_load(f)
+                if 'bing-stt' in profile:
+                    if 'key' in profile['bing-stt']:
+                        config['key'] = profile['bing-stt']['key']
+                    if 'language' in profile['bing-stt']:
+                        config['language'] = profile['bing-stt']['language']
+                    if 'show_all' in profile['bing-stt']:
+                        config['show_all'] = profile['bing-stt']['show_all']
+        return config
+
+    def transcribe(self, audio_data, mode=None):
+        access_token, expire_time = getattr(self, "bing_cached_access_token", None), getattr(self, "bing_cached_access_token_expiry", None)
+        allow_caching = True
+        try:
+            from time import monotonic # we need monotonic time to avoid being affected by system clock changes, but this is only available in Python 3.3+
+        except ImportError:
+            try:
+                from monotonic import monotonic # use time.monotonic backport for Python 2 if available (from https://pypi.python.org/pypi/monotonic)
+            except (ImportError, RuntimeError):
+                expire_time = None # monotonic time not available, don't cache access tokens
+                allow_caching = False # don't allow caching, since monotonic time isn't available
+        if expire_time is None or monotonic() > expire_time: # caching not enabled, first credential request, or the access token from the previous one expired
+            # get an access token using OAuth
+            credential_url = "https://oxford-speech.cloudapp.net/token/issueToken"
+            credential_request = Request(credential_url, data = urlencode({
+              "grant_type": "client_credentials",
+              "client_id": "python",
+              "client_secret": self.key,
+              "scope": "https://speech.platform.bing.com"
+            }).encode("utf-8"))
+            if allow_caching:
+                start_time = monotonic()
+            try:
+                credential_response = urlopen(credential_request)
+            except HTTPError as e:
+                raise RequestError("recognition request failed: {0}".format(getattr(e, "reason", "status {0}".format(e.code)))) # use getattr to be compatible with Python 2.6
+            except URLError as e:
+                raise RequestError("recognition connection failed: {0}".format(e.reason))
+            credential_text = credential_response.read().decode("utf-8")
+            credentials = json.loads(credential_text)
+            access_token, expiry_seconds = credentials["access_token"], float(credentials["expires_in"])
+
+            if allow_caching:
+                # save the token for the duration it is valid for
+                self.bing_cached_access_token = access_token
+                self.bing_cached_access_token_expiry = start_time + expiry_seconds
+
+        wav_data = audio_data.get_wav_data(
+            convert_rate = 16000, # audio samples must be 8kHz or 16 kHz
+            convert_width = 2 # audio samples should be 16-bit
+        )
+        url = "https://speech.platform.bing.com/recognize/query?{0}".format(urlencode({
+            "version": "3.0",
+            "requestid": uuid.uuid4(),
+            "appID": "D4D52672-91D7-4C74-8AD8-42B1D98141A5",
+            "format": "json",
+            "locale": self.language,
+            "device.os": "wp7",
+            "scenarios": "ulm",
+            "instanceid": uuid.uuid4(),
+            "result.profanitymarkup": "0",
+        }))
+        request = Request(url, data = wav_data, headers = {
+            "Authorization": "Bearer {0}".format(access_token),
+            "Content-Type": "audio/wav; samplerate=16000; sourcerate={0}; trustsourcerate=true".format(audio_data.sample_rate),
+        })
+        try:
+            response = urlopen(request)
+        except HTTPError as e:
+            raise RequestError("recognition request failed: {0}".format(getattr(e, "reason", "status {0}".format(e.code)))) # use getattr to be compatible with Python 2.6
+        except URLError as e:
+            raise RequestError("recognition connection failed: {0}".format(e.reason))
+        response_text = response.read().decode("utf-8")
+        result = json.loads(response_text)
+
+        # return results
+        if self.show_all: return result
+        if "header" not in result or "lexical" not in result["header"]:
+            return ""
+        
+        return result["header"]["lexical"]
 
 def get_engine_by_slug(slug=None):
     """
