@@ -30,13 +30,14 @@ class Conversation(object):
         self._logger.debug("Started to listen actively with threshold: %r",
                                threshold)
         self.speaker.play_wav_file(jasperpath.data('audio', 'beep_hi.wav'))
-        input = self.mic.activeListenToAllOptions(threshold)
+        audio_data = self.mic.listen()
+		text = self.speech_recognizer.transcribe(audio_data)
         self.speaker.play_wav_file(jasperpath.data('audio', 'beep_lo.wav'))
         self._logger.debug("Stopped to listen actively with threshold: %r",
                                threshold)
 
-        if input:
-            self.brain.query(input)
+        if text:
+            self.brain.query(text)
         else:
             self.speaker.clean_and_say("Pardon?")
 

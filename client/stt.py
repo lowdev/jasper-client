@@ -58,7 +58,13 @@ class AbstractSTTEngine(object):
         return True
 
     @abstractmethod
-    def transcribe(self, fp):
+    def transcribe(self, audio_data):
+	    """
+        Performs STT, transcribing an audio file and returning the result.
+
+        Arguments:
+            audio_data -- a file object containing audio data
+        """
         pass
 
 
@@ -146,14 +152,11 @@ class PocketSphinxSTT(AbstractSTTEngine):
 
         return config
 
-    def transcribe(self, fp):
-        """
-        Performs STT, transcribing an audio file and returning the result.
-
-        Arguments:
-            fp -- a file object containing audio data
-        """
-
+    def transcribe(self, audio_data):
+		fp = audio_data.get_wav_data(
+            convert_rate = 16000, # audio samples must be 8kHz or 16 kHz
+            convert_width = 2 # audio samples should be 16-bit
+        )
         fp.seek(44)
 
         # FIXME: Can't use the Decoder.decode_raw() here, because
@@ -238,7 +241,12 @@ class JuliusSTT(AbstractSTTEngine):
                         config['tiedlist'] = profile['julius']['tiedlist']
         return config
 
-    def transcribe(self, fp, mode=None):
+    def transcribe(self, audio_data):
+	    fp = audio_data.get_wav_data(
+            convert_rate = 16000, # audio samples must be 8kHz or 16 kHz
+            convert_width = 2 # audio samples should be 16-bit
+        )
+
         cmd = ['julius',
                '-quiet',
                '-nolog',
@@ -365,14 +373,11 @@ class GoogleSTT(AbstractSTTEngine):
                     config['api_key'] = profile['keys']['GOOGLE_SPEECH']
         return config
 
-    def transcribe(self, fp):
-        """
-        Performs STT via the Google Speech API, transcribing an audio file and
-        returning an English string.
-
-        Arguments:
-        audio_file_path -- the path to the .wav file to be transcribed
-        """
+    def transcribe(self, audio_data):
+        fp = audio_data.get_wav_data(
+            convert_rate = 16000, # audio samples must be 8kHz or 16 kHz
+            convert_width = 2 # audio samples should be 16-bit
+        )
 
         if not self.api_key:
             self._logger.critical('API key missing, transcription request ' +
@@ -481,7 +486,12 @@ class AttSTT(AbstractSTTEngine):
             self._token = r.json()['access_token']
         return self._token
 
-    def transcribe(self, fp):
+    def transcribe(self, audio_data):
+	    fp = audio_data.get_wav_data(
+            convert_rate = 16000, # audio samples must be 8kHz or 16 kHz
+            convert_width = 2 # audio samples should be 16-bit
+        )
+
         data = fp.read()
         r = self._get_response(data)
         if r.status_code == requests.codes['unauthorized']:
@@ -585,7 +595,11 @@ class WitAiSTT(AbstractSTTEngine):
     def headers(self):
         return self._headers
 
-    def transcribe(self, fp):
+    def transcribe(self, audio_data):
+        fp = audio_data.get_wav_data(
+            convert_rate = 16000, # audio samples must be 8kHz or 16 kHz
+            convert_width = 2 # audio samples should be 16-bit
+        )
         data = fp.read()
         r = requests.post('https://api.wit.ai/speech?v=20150101',
                           data=data,
