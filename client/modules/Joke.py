@@ -54,7 +54,7 @@ def handle(text, speaker, requester, profile):
 
         punchLine(requester.make_a_request())
 
-    firstLine(requester.make_a_request()))
+    firstLine(requester.make_a_request())
 
 
 def isValid(text):

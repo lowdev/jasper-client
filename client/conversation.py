@@ -19,7 +19,7 @@ class Conversation(object):
         return self.interrupted
 
     def startListenningActively(self):
-        text = requester.make_a_request()
+        text = self.requester.make_a_request()
 
         if text:
             self.brain.query(text)
@@ -36,9 +36,6 @@ class Conversation(object):
         MODEL_FILE = os.path.join(TOP_DIR, "snowboy/model.pmdl")
 
         signal.signal(signal.SIGINT, self.signal_handler)
-
-        print("A moment of silence, please...")
-        self.mic.adjust_for_ambient_noise()
 
         detector = snowboydecoder.HotwordDetector(MODEL_FILE, sensitivity=0.5)
         print('Listening... Press Ctrl+C to exit')

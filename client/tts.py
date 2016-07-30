@@ -93,6 +93,7 @@ class AbstractTTSEngine(object):
         stream_out.start_stream()
         stream_out.write(ding_data)
         time.sleep(0.2)
+        
         stream_out.stop_stream()
         stream_out.close()
         audio.terminate()
