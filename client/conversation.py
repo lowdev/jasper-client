@@ -37,7 +37,7 @@ class Conversation(object):
         if input:
             self.brain.query(input)
         else:
-            self.mic.say("Pardon?")
+            self.speaker.clean_and_say("Pardon?")
 
     def handleForever(self):
         """
