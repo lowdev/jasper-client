@@ -97,9 +97,7 @@ class Jasper(object):
 
         self.speaker = tts_engine_class.get_instance()
         self.speech_recognizer = stt_engine_class.get_active_instance()
-
-        # Initialize Mic
-        self.mic = Mic(self.speech_recognizer)
+        self.mic = Mic()
 
     def run(self):
         if 'first_name' in self.config:

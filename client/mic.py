@@ -3,8 +3,6 @@
     The Mic class handles all interactions with the microphone.
 """
 import logging
-import tempfile
-import wave
 import audioop
 import pyaudio
 import math
@@ -18,7 +16,7 @@ class Mic:
     RATE = 16000
     CHUNK = 1024
 
-    def __init__(self, active_stt_engine):
+    def __init__(self):
         """
         Initiates the pocketsphinx instance.
 
@@ -26,7 +24,6 @@ class Mic:
         acive_stt_engine -- performs STT while Jasper is in active listen mode
         """
         self._logger = logging.getLogger(__name__)
-        self.active_stt_engine = active_stt_engine
         self._logger.info("Initializing PyAudio. ALSA/Jack error messages " +
                           "that pop up during this process are normal and " +
                           "can usually be safely ignored.")
