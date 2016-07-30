@@ -9,10 +9,11 @@ import jasperpath
 
 class Conversation(object):
 
-    def __init__(self, speaker, mic, profile):
+    def __init__(self, speaker, speech_recognizer, mic, profile):
         self._logger = logging.getLogger(__name__)
         self.mic = mic
         self.speaker = speaker
+        self.speech_recognizer = speech_recognizer
         self.profile = profile
         self.brain = Brain(self.speaker, self.mic, profile)
         self.notifier = Notifier(profile)
