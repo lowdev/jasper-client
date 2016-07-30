@@ -42,7 +42,7 @@ def getTopStories(maxResults=None):
     return matches
 
 
-def handle(text, speaker, mic, profile):
+def handle(text, speaker, requester, profile):
     """
         Responds to user-input, typically speech text, with a sample of
         Hacker News's top headlines, sending them to the user over email
@@ -51,7 +51,7 @@ def handle(text, speaker, mic, profile):
         Arguments:
         text -- user-input, typically transcribed speech
         speaker -- used to interact with the user (output)
-        mic -- used to interact with the user (input)
+        requester -- used to interact with the user (input)
         profile -- contains information related to the user (e.g., phone
                    number)
     """
@@ -124,7 +124,7 @@ def handle(text, speaker, mic, profile):
         speaker.clean_and_say("Here are some front-page articles. " +
                 all_titles + ". Would you like me to send you these? " +
                 "If so, which?")
-        handleResponse(mic.activeListen())
+        handleResponse(requester.make_a_request())
 
     else:
         speaker.clean_and_say("Here are some front-page articles. " + all_titles)

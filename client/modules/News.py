@@ -32,7 +32,7 @@ def getTopArticles(maxResults=None):
     return articles
 
 
-def handle(text, speaker, mic, profile):
+def handle(text, speaker, requester, profile):
     """
         Responds to user-input, typically speech text, with a summary of
         the day's top news headlines, sending them to the user over email
@@ -41,7 +41,7 @@ def handle(text, speaker, mic, profile):
         Arguments:
         text -- user-input, typically transcribed speech
         speaker -- used to interact with the user (output)
-        mic -- used to interact with the user (input)
+        requester -- used to interact with the user (input)
         profile -- contains information related to the user (e.g., phone
                    number)
     """
@@ -115,7 +115,7 @@ def handle(text, speaker, mic, profile):
         speaker.clean_and_say("Here are the current top headlines. " + all_titles +
                 ". Would you like me to send you these articles? " +
                 "If so, which?")
-        handleResponse(mic.listen())
+        handleResponse(requester.make_a_request())
 
     else:
         speaker.clean_and_say(

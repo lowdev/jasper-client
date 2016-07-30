@@ -7,14 +7,14 @@ from semantic.dates import DateService
 WORDS = ["TIME"]
 
 
-def handle(text, speaker, mic, profile):
+def handle(text, speaker, requester, profile):
     """
         Reports the current time based on the user's timezone.
 
         Arguments:
         text -- user-input, typically transcribed speech
         speaker -- used to interact with the user (output)
-        mic -- used to interact with the user (input)
+        requester -- used to interact with the user (input)
         profile -- contains information related to the user (e.g., phone
                    number)
     """

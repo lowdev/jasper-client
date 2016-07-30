@@ -11,6 +11,8 @@ import argparse
 
 from client import tts, stt, jasperpath, diagnose
 from client.conversation import Conversation
+from requester import Requester
+from brain import Brain
 
 # Add jasperpath.LIB_PATH to sys.path
 sys.path.append(jasperpath.LIB_PATH)
@@ -97,7 +99,9 @@ class Jasper(object):
 
         self.speaker = tts_engine_class.get_instance()
         self.speech_recognizer = stt_engine_class.get_active_instance()
-        self.mic = Mic()
+
+		self.requester = Requester(self.speaker, self.speech_recognizer, Mic())
+		self.brain = Brain(self.speaker, self.requester, self.config)
 
     def run(self):
         if 'first_name' in self.config:
@@ -107,7 +111,7 @@ class Jasper(object):
             salutation = "How can I be of service?"
         self.speaker.clean_and_say(salutation)
 
-        conversation = Conversation(self.speaker, self.speech_recognizer, self.mic, self.config)
+        conversation = Conversation(self.requester, self.brain)
         conversation.handleForever()
 
 if __name__ == "__main__":
