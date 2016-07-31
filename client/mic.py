@@ -97,7 +97,7 @@ class Mic:
             while True:
                 elapsed_time += seconds_per_buffer
                 if timeout and elapsed_time > timeout: # handle timeout if specified
-                    raise WaitTimeoutError("listening timed out")
+                    break
 
                 buffer = stream.read(self.CHUNK)
                 if len(buffer) == 0: break # reached end of the stream
@@ -119,6 +119,7 @@ class Mic:
             pause_count, phrase_count = 0, 0
             while True:
                 elapsed_time += seconds_per_buffer
+                if timeout and elapsed_time > timeout: break                
 
                 buffer = stream.read(self.CHUNK)
                 if len(buffer) == 0: break # reached end of the stream
