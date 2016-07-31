@@ -17,12 +17,13 @@ def handle(text, speaker, requester, profile):
         profile -- contains information related to the user (e.g., phone
                    number)
     """
-
-    client = wolframalpha.Client(app_id)
-	res = client.query(text)
-	for pod in res.pods:
-		speaker.clean_and_say(pod)
-		return
+    
+    client = wolframalpha.Client(profile['wolfram-alpha_app_id'])
+    res = client.query(text)
+    for pod in res.pods:
+        print("text : " + pod.title)
+        speaker.clean_and_say(pod.text)
+        #return
 
     Unclear.handle(text, speaker, requester, profile)
 
