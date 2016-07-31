@@ -75,7 +75,7 @@ class AbstractTTSEngine(object):
     def clean_and_say(self, phrase,
             OPTIONS=" -vdefault+m3 -p 40 -s 160 --stdout > say.wav"):
         # alter phrase before speaking
-        phrase = alteration.clean(phrase)
+        # phrase = alteration.clean(phrase)
         self.say(phrase)
 
     def play_wav_file(self, fname):

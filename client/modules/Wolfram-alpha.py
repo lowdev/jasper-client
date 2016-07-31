@@ -21,9 +21,12 @@ def handle(text, speaker, requester, profile):
     client = wolframalpha.Client(profile['wolfram-alpha_app_id'])
     res = client.query(text)
     for pod in res.pods:
-        print("text : " + pod.title)
-        speaker.clean_and_say(pod.text)
-        #return
+       text = pod.text
+       if text:
+           #text_to_say =  ''.join((" " + text).splitlines())
+           print text
+           speaker.clean_and_say(text) 
+           return
 
     Unclear.handle(text, speaker, requester, profile)
 
