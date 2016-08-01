@@ -1,4 +1,4 @@
-jasper-client - Snowboy Hot Word Detection
+Jasper - Snowboy Hot Word Detection
 =============
 
 [![Build Status](https://travis-ci.org/jasperproject/jasper-client.svg?branch=master)](https://travis-ci.org/jasperproject/jasper-client) [![Coverage Status](https://img.shields.io/coveralls/jasperproject/jasper-client.svg)](https://coveralls.io/r/jasperproject/jasper-client) [![Codacy Badge](https://www.codacy.com/project/badge/3a50e1bc2261419894d76b7e2c1ac694)](https://www.codacy.com/app/jasperproject/jasper-client)
@@ -24,6 +24,15 @@ To address these points, i decide to use "Snowboy Hot Word Detection" [https://s
 - Low latency and no internet needed
 - Small memory footprint and cross-platform support
 
+I use code from https://github.com/Uberi/speech_recognition to :
+- Have a new threshold calculation
+- Add bing stt
+- Record
+
+Go try this project individually :
+-> https://snowboy.kitt.ai/
+-> https://github.com/Uberi/speech_recognition
+
 ## Installation
 
 - Follow the python installation -> [https://github.com/Kitt-AI/snowboy](https://github.com/Kitt-AI/snowboy)
@@ -34,9 +43,6 @@ To address these points, i decide to use "Snowboy Hot Word Detection" [https://s
 
 ## TODO
 
-- Remove "Persona" in the code
-- Remove all the dependance in the code stt_passive_engine
-- Too much latence in active listenning.
 - Re add gmail notification 
 
 ## Contributing
